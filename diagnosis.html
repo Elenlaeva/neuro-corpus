@@ -9,12 +9,13 @@ body { font-family: Arial; margin: 40px; }
 h1 { margin-bottom: 5px; }
 h2 { margin-top: 30px; }
 table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: left; cursor: pointer; }
 th { background-color: #f2f2f2; }
 tr:hover { background-color: #f9f9f9; }
 audio { width: 200px; }
 .back { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #4CAF50; font-weight: bold; }
 .back:hover { text-decoration: underline; }
+.filter { margin: 10px 0; padding: 5px; width: 300px; }
 </style>
 </head>
 
@@ -23,6 +24,8 @@ audio { width: 200px; }
 <a href="index.html" class="back">← Назад к меню</a>
 <h1 id="title"></h1>
 <p id="stats"></p>
+
+<input type="text" id="filterInput" class="filter" placeholder="Фильтр по тексту или ID файла">
 
 <div id="tables"></div>
 
@@ -34,12 +37,8 @@ document.getElementById('title').innerText = diagnosis;
 fetch('metadata.json')
   .then(r => r.json())
   .then(data => {
-    const items = data.filter(x => x.diagnosis === diagnosis);
-
-    // Общая статистика
-    const totalDuration = items.reduce((sum, x) => sum + x.duration, 0);
-    document.getElementById('stats').innerText =
-      `Файлов: ${items.length}, общая длительность: ${totalDuration.toFixed(1)} сек`;
+    let items = data.filter(x => x.diagnosis === diagnosis);
+    const container = document.getElementById('tables');
 
     // Группируем по speaker
     const grouped = {};
@@ -48,23 +47,20 @@ fetch('metadata.json')
       grouped[x.speaker].push(x);
     });
 
-    const container = document.getElementById('tables');
-
-    for (const speaker in grouped) {
-      const group = grouped[speaker];
-
-      const speakerDuration = group.reduce((sum, x) => sum + x.duration, 0);
-
+    // Функция создания таблицы для каждого speaker
+    function createTable(speaker, group) {
       const h2 = document.createElement('h2');
-      h2.innerText = `Говорящий: ${speaker} (файлов: ${group.length}, длительность: ${speakerDuration.toFixed(1)} сек)`;
+      h2.innerText = `Говорящий: ${speaker} (файлов: ${group.length})`;
       container.appendChild(h2);
 
       const table = document.createElement('table');
+      table.id = `table-${speaker}`;
+
       const thead = document.createElement('thead');
       thead.innerHTML = `
         <tr>
-          <th>ID файла</th>
-          <th>Текст</th>
+          <th onclick="sortTable('${speaker}', 0)">ID файла ▲▼</th>
+          <th onclick="sortTable('${speaker}', 1)">Текст ▲▼</th>
           <th>Длительность (сек)</th>
           <th>Комментарий к диагнозу</th>
           <th>Аудио</th>
@@ -78,7 +74,7 @@ fetch('metadata.json')
         tr.innerHTML = `
           <td>${x.id}</td>
           <td>${x.text}</td>
-          <td>${x.duration}</td>
+          <td>—</td>
           <td>${x.diagnosis_comment || ''}</td>
           <td><audio controls src="audio/${x.id}"></audio></td>
         `;
@@ -86,7 +82,69 @@ fetch('metadata.json')
       });
       table.appendChild(tbody);
       container.appendChild(table);
+
+      // Автоматическое вычисление duration для аудио
+      const audios = table.querySelectorAll('audio');
+      audios.forEach((audio, i) => {
+        audio.onloadedmetadata = () => {
+          tbody.rows[i].cells[2].innerText = audio.duration.toFixed(1);
+          updateStats();
+        }
+      });
     }
+
+    // Создаем таблицы
+    for (const speaker in grouped) {
+      createTable(speaker, grouped[speaker]);
+    }
+
+    // Обновление общей статистики
+    function updateStats() {
+      let totalFiles = 0;
+      let totalDuration = 0;
+      for (const speaker in grouped) {
+        const table = document.getElementById(`table-${speaker}`);
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+          const dur = parseFloat(row.cells[2].innerText);
+          if (!isNaN(dur)) {
+            totalFiles++;
+            totalDuration += dur;
+          }
+        });
+      }
+      document.getElementById('stats').innerText =
+        `Файлов: ${totalFiles}, общая длительность: ${totalDuration.toFixed(1)} сек`;
+    }
+
+    // Фильтр
+    document.getElementById('filterInput').addEventListener('input', function() {
+      const filter = this.value.toLowerCase();
+      for (const speaker in grouped) {
+        const table = document.getElementById(`table-${speaker}`);
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+          const text = row.cells[0].innerText + " " + row.cells[1].innerText;
+          row.style.display = text.toLowerCase().includes(filter) ? '' : 'none';
+        });
+      }
+    });
+
+    // Сортировка таблицы
+    window.sortTable = function(speaker, colIndex) {
+      const table = document.getElementById(`table-${speaker}`);
+      const tbody = table.querySelector('tbody');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      const asc = !table.asc;
+      rows.sort((a, b) => {
+        const valA = a.cells[colIndex].innerText.toLowerCase();
+        const valB = b.cells[colIndex].innerText.toLowerCase();
+        return (valA > valB ? 1 : -1) * (asc ? 1 : -1);
+      });
+      rows.forEach(r => tbody.appendChild(r));
+      table.asc = asc;
+    }
+
   });
 </script>
 
