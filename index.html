@@ -5,17 +5,10 @@
 <title>Sonus Mentis</title>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 40px;
-}
-.entry {
-  border-bottom: 1px solid #ddd;
-  padding: 15px 0;
-}
-audio {
-  width: 300px;
-}
+body { font-family: Arial; margin: 40px; }
+ul { list-style: none; padding: 0; }
+li { margin: 10px 0; }
+a { font-size: 18px; text-decoration: none; }
 </style>
 </head>
 
@@ -23,27 +16,21 @@ audio {
 
 <h1>Sonus Mentis</h1>
 <p>Первый корпус речи русскоязычных пациентов с нейродегенеративными заболеваниями</p>
+<p>Выберите диагноз:</p>
 
-<div id="corpus"></div>
+<ul id="menu"></ul>
 
 <script>
 fetch('metadata.json')
-  .then(response => response.json())
+  .then(r => r.json())
   .then(data => {
-    const container = document.getElementById('corpus');
+    const diagnoses = [...new Set(data.map(x => x.diagnosis))];
+    const menu = document.getElementById('menu');
 
-    data.forEach(item => {
-      const div = document.createElement('div');
-      div.className = 'entry';
-
-      div.innerHTML = `
-        <audio controls src="audio/${item.id}"></audio>
-        <p><strong>Текст:</strong> ${item.text}</p>
-        <p><strong>Говорящий:</strong> ${item.speaker}</p>
-        <p><strong>Диагноз:</strong> ${item.diagnosis}</p>
-      `;
-
-      container.appendChild(div);
+    diagnoses.forEach(d => {
+      const li = document.createElement('li');
+      li.innerHTML = `<a href="diagnosis.html?d=${encodeURIComponent(d)}">${d}</a>`;
+      menu.appendChild(li);
     });
   });
 </script>
