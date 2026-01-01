@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <title>Диагноз</title>
 
+<!-- Подключаем Source Sans Pro -->
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
 :root {
   --main-color: #4A90E2;
@@ -14,7 +17,7 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Source Sans Pro', Arial, sans-serif;
   margin: 40px;
   background: var(--bg-color);
   color: var(--text-color);
@@ -34,6 +37,7 @@ a.back:hover {
 h1 { margin-bottom: 5px; }
 h2 { margin-top: 30px; }
 
+/* Фильтр */
 .filter {
   padding: 8px 12px;
   width: 350px;
@@ -41,12 +45,14 @@ h2 { margin-top: 30px; }
   border: 1px solid var(--main-color);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   margin-bottom: 15px;
+  font-family: 'Source Sans Pro', Arial, sans-serif;
 }
 .filter:focus {
   outline: none;
   border-color: #357ABD;
 }
 
+/* Таблицы оставляем в стандартном шрифте */
 table {
   border-collapse: collapse;
   width: 100%;
@@ -61,20 +67,19 @@ th, td {
   padding: 8px;
   text-align: left;
   cursor: pointer;
+  font-family: Arial, sans-serif; /* таблицы остаются без Source Sans Pro */
 }
 
-th {
-  background-color: var(--light-color);
-}
+th { background-color: var(--light-color); }
 
 tr:hover { background-color: var(--highlight-color); }
 
+/* Цвета по тяжести диагноза */
 .low { background-color: #D9F0FF; }
 .medium { background-color: #A3D2FF; }
 .high { background-color: #4A90E2; color: white; }
 
 audio { width: 180px; border-radius: 8px; }
-
 </style>
 </head>
 
