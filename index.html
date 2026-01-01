@@ -5,22 +5,44 @@
 <title>Sonus Mentis</title>
 
 <style>
-body { font-family: Arial; margin: 40px; }
+:root {
+  --main-color: #4A90E2;
+  --light-color: #E6F0FA;
+  --bg-color: #F2F8FF;
+  --text-color: #1C2B4A;
+  --highlight-color: #CDE6FF;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 40px;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
 h1 { margin-bottom: 10px; }
 p { margin-bottom: 20px; }
-#menu { display: flex; flex-wrap: wrap; gap: 15px; }
+
+#menu {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+}
+
 .menu-item {
-  background-color: #f2f2f2;
-  padding: 10px 20px;
-  border-radius: 8px;
-  text-decoration: none;
-  color: #333;
+  background-color: var(--main-color);
+  color: white;
+  padding: 15px;
+  border-radius: 12px;
+  text-align: center;
   font-weight: bold;
-  transition: 0.2s;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s, background-color 0.2s;
+  text-decoration: none;
 }
 .menu-item:hover {
-  background-color: #4CAF50;
-  color: white;
+  transform: scale(1.05);
+  background-color: #357ABD;
 }
 </style>
 </head>
@@ -39,7 +61,7 @@ fetch('metadata.json')
   .then(data => {
     const menu = document.getElementById('menu');
 
-    // Группируем по диагнозу и считаем количество и длительность
+    // Группируем по диагнозу
     const grouped = {};
     data.forEach(x => {
       if (!grouped[x.diagnosis]) grouped[x.diagnosis] = { count: 0, total: 0 };
@@ -48,7 +70,6 @@ fetch('metadata.json')
     });
 
     for (const diag in grouped) {
-      const info = grouped[diag];
       const a = document.createElement('a');
       a.href = `diagnosis.html?d=${encodeURIComponent(diag)}`;
       a.className = 'menu-item';
