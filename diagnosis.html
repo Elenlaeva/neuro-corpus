@@ -6,16 +6,21 @@
 
 <style>
 body { font-family: Arial; margin: 40px; }
+h1 { margin-bottom: 5px; }
 h2 { margin-top: 30px; }
 table { border-collapse: collapse; width: 100%; margin-top: 10px; }
 th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
 th { background-color: #f2f2f2; }
+tr:hover { background-color: #f9f9f9; }
 audio { width: 200px; }
+.back { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #4CAF50; font-weight: bold; }
+.back:hover { text-decoration: underline; }
 </style>
 </head>
 
 <body>
 
+<a href="index.html" class="back">← Назад к меню</a>
 <h1 id="title"></h1>
 <p id="stats"></p>
 
@@ -24,17 +29,15 @@ audio { width: 200px; }
 <script>
 const params = new URLSearchParams(window.location.search);
 const diagnosis = params.get('d');
-
 document.getElementById('title').innerText = diagnosis;
 
 fetch('metadata.json')
   .then(r => r.json())
   .then(data => {
-    // Фильтруем только нужный диагноз
     const items = data.filter(x => x.diagnosis === diagnosis);
 
-    // Считаем общие stats
-    let totalDuration = items.reduce((sum, x) => sum + x.duration, 0);
+    // Общая статистика
+    const totalDuration = items.reduce((sum, x) => sum + x.duration, 0);
     document.getElementById('stats').innerText =
       `Файлов: ${items.length}, общая длительность: ${totalDuration.toFixed(1)} сек`;
 
@@ -47,12 +50,13 @@ fetch('metadata.json')
 
     const container = document.getElementById('tables');
 
-    // Создаём таблицу для каждого speaker
     for (const speaker in grouped) {
       const group = grouped[speaker];
 
+      const speakerDuration = group.reduce((sum, x) => sum + x.duration, 0);
+
       const h2 = document.createElement('h2');
-      h2.innerText = `Говорящий: ${speaker} (файлов: ${group.length})`;
+      h2.innerText = `Говорящий: ${speaker} (файлов: ${group.length}, длительность: ${speakerDuration.toFixed(1)} сек)`;
       container.appendChild(h2);
 
       const table = document.createElement('table');
