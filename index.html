@@ -6,9 +6,22 @@
 
 <style>
 body { font-family: Arial; margin: 40px; }
-ul { list-style: none; padding: 0; }
-li { margin: 10px 0; }
-a { font-size: 18px; text-decoration: none; }
+h1 { margin-bottom: 10px; }
+p { margin-bottom: 20px; }
+#menu { display: flex; flex-wrap: wrap; gap: 15px; }
+.menu-item {
+  background-color: #f2f2f2;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  transition: 0.2s;
+}
+.menu-item:hover {
+  background-color: #4CAF50;
+  color: white;
+}
 </style>
 </head>
 
@@ -18,20 +31,30 @@ a { font-size: 18px; text-decoration: none; }
 <p>Первый корпус речи русскоязычных пациентов с нейродегенеративными заболеваниями</p>
 <p>Выберите диагноз:</p>
 
-<ul id="menu"></ul>
+<div id="menu"></div>
 
 <script>
 fetch('metadata.json')
   .then(r => r.json())
   .then(data => {
-    const diagnoses = [...new Set(data.map(x => x.diagnosis))];
     const menu = document.getElementById('menu');
 
-    diagnoses.forEach(d => {
-      const li = document.createElement('li');
-      li.innerHTML = `<a href="diagnosis.html?d=${encodeURIComponent(d)}">${d}</a>`;
-      menu.appendChild(li);
+    // Группируем по диагнозу и считаем количество и длительность
+    const grouped = {};
+    data.forEach(x => {
+      if (!grouped[x.diagnosis]) grouped[x.diagnosis] = { count: 0, total: 0 };
+      grouped[x.diagnosis].count += 1;
+      grouped[x.diagnosis].total += x.duration;
     });
+
+    for (const diag in grouped) {
+      const info = grouped[diag];
+      const a = document.createElement('a');
+      a.href = `diagnosis.html?d=${encodeURIComponent(diag)}`;
+      a.className = 'menu-item';
+      a.innerText = `${diag}\n(${info.count} файлов, ${info.total.toFixed(1)} сек)`;
+      menu.appendChild(a);
+    }
   });
 </script>
 
