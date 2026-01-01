@@ -6,8 +6,11 @@
 
 <style>
 body { font-family: Arial; margin: 40px; }
-.entry { border-bottom: 1px solid #ddd; padding: 15px 0; }
-audio { width: 300px; }
+h2 { margin-top: 30px; }
+table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+th { background-color: #f2f2f2; }
+audio { width: 200px; }
 </style>
 </head>
 
@@ -16,7 +19,7 @@ audio { width: 300px; }
 <h1 id="title"></h1>
 <p id="stats"></p>
 
-<div id="list"></div>
+<div id="tables"></div>
 
 <script>
 const params = new URLSearchParams(window.location.search);
@@ -27,26 +30,59 @@ document.getElementById('title').innerText = diagnosis;
 fetch('metadata.json')
   .then(r => r.json())
   .then(data => {
+    // Фильтруем только нужный диагноз
     const items = data.filter(x => x.diagnosis === diagnosis);
-    const list = document.getElementById('list');
 
-    let totalDuration = 0;
-
-    items.forEach(x => {
-      totalDuration += x.duration;
-
-      const div = document.createElement('div');
-      div.className = 'entry';
-      div.innerHTML = `
-        <audio controls src="audio/${x.id}"></audio>
-        <p>${x.text}</p>
-        <small>${x.duration} сек</small>
-      `;
-      list.appendChild(div);
-    });
-
+    // Считаем общие stats
+    let totalDuration = items.reduce((sum, x) => sum + x.duration, 0);
     document.getElementById('stats').innerText =
       `Файлов: ${items.length}, общая длительность: ${totalDuration.toFixed(1)} сек`;
+
+    // Группируем по speaker
+    const grouped = {};
+    items.forEach(x => {
+      if (!grouped[x.speaker]) grouped[x.speaker] = [];
+      grouped[x.speaker].push(x);
+    });
+
+    const container = document.getElementById('tables');
+
+    // Создаём таблицу для каждого speaker
+    for (const speaker in grouped) {
+      const group = grouped[speaker];
+
+      const h2 = document.createElement('h2');
+      h2.innerText = `Говорящий: ${speaker} (файлов: ${group.length})`;
+      container.appendChild(h2);
+
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      thead.innerHTML = `
+        <tr>
+          <th>ID файла</th>
+          <th>Текст</th>
+          <th>Длительность (сек)</th>
+          <th>Комментарий к диагнозу</th>
+          <th>Аудио</th>
+        </tr>
+      `;
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      group.forEach(x => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${x.id}</td>
+          <td>${x.text}</td>
+          <td>${x.duration}</td>
+          <td>${x.diagnosis_comment || ''}</td>
+          <td><audio controls src="audio/${x.id}"></audio></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      container.appendChild(table);
+    }
   });
 </script>
 
