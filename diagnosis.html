@@ -11,11 +11,14 @@ h2 { margin-top: 30px; }
 table { border-collapse: collapse; width: 100%; margin-top: 10px; }
 th, td { border: 1px solid #ccc; padding: 8px; text-align: left; cursor: pointer; }
 th { background-color: #f2f2f2; }
-tr:hover { background-color: #f9f9f9; }
+tr:hover { background-color: #f0f8ff; } /* легкая подсветка при наведении */
+.low { background-color: #d4edda; }      /* легкая форма */
+.medium { background-color: #fff3cd; }   /* средняя форма */
+.high { background-color: #f8d7da; }     /* тяжелая форма */
 audio { width: 200px; }
 .back { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #4CAF50; font-weight: bold; }
 .back:hover { text-decoration: underline; }
-.filter { margin: 10px 0; padding: 5px; width: 300px; }
+.filter { margin: 10px 0; padding: 5px; width: 350px; }
 </style>
 </head>
 
@@ -25,7 +28,7 @@ audio { width: 200px; }
 <h1 id="title"></h1>
 <p id="stats"></p>
 
-<input type="text" id="filterInput" class="filter" placeholder="Фильтр по тексту или ID файла">
+<input type="text" id="filterInput" class="filter" placeholder="Фильтр по тексту, ID или комментариям">
 
 <div id="tables"></div>
 
@@ -37,7 +40,6 @@ document.getElementById('title').innerText = diagnosis;
 fetch('metadata.json')
   .then(r => r.json())
   .then(data => {
-    // Фильтруем по диагнозу
     const items = data.filter(x => x.diagnosis === diagnosis);
     const container = document.getElementById('tables');
 
@@ -48,9 +50,9 @@ fetch('metadata.json')
       grouped[x.speaker].push(x);
     });
 
-    // Создание таблицы для каждого speaker
+    // Создаем таблицы для каждого speaker
     function createTable(speakerId, group) {
-      const info = group[0]; // все записи одного speaker
+      const info = group[0];
 
       const h2 = document.createElement('h2');
       h2.innerHTML = `
@@ -69,8 +71,8 @@ fetch('metadata.json')
         <tr>
           <th onclick="sortTable('${speakerId}', 0)">ID файла ▲▼</th>
           <th onclick="sortTable('${speakerId}', 1)">Текст ▲▼</th>
-          <th>Длительность (сек)</th>
-          <th>Комментарий к диагнозу</th>
+          <th onclick="sortTable('${speakerId}', 2)">Длительность ▲▼</th>
+          <th onclick="sortTable('${speakerId}', 3)">Комментарий ▲▼</th>
           <th>Аудио</th>
         </tr>
       `;
@@ -79,6 +81,15 @@ fetch('metadata.json')
       const tbody = document.createElement('tbody');
       group.forEach(x => {
         const tr = document.createElement('tr');
+
+        // Цвет по тяжести диагноза (пример: можно кастомизировать)
+        let severityClass = '';
+        if (x.diagnosis_comment.toLowerCase().includes('умеренной')) severityClass = 'medium';
+        else if (x.diagnosis_comment.toLowerCase().includes('тяжелой')) severityClass = 'high';
+        else severityClass = 'low';
+
+        tr.className = severityClass;
+
         tr.innerHTML = `
           <td>${x.id}</td>
           <td>${x.text}</td>
@@ -91,7 +102,7 @@ fetch('metadata.json')
       table.appendChild(tbody);
       container.appendChild(table);
 
-      // Автоматическое вычисление duration аудио
+      // Авто-длительность
       const audios = table.querySelectorAll('audio');
       audios.forEach((audio, i) => {
         audio.onloadedmetadata = () => {
@@ -101,12 +112,11 @@ fetch('metadata.json')
       });
     }
 
-    // Создаём все таблицы
     for (const speakerId in grouped) {
       createTable(speakerId, grouped[speakerId]);
     }
 
-    // Обновление общей статистики
+    // Статистика
     function updateStats() {
       let totalFiles = 0;
       let totalDuration = 0;
@@ -115,7 +125,7 @@ fetch('metadata.json')
         const rows = table.querySelectorAll('tbody tr');
         rows.forEach(row => {
           const dur = parseFloat(row.cells[2].innerText);
-          if (!isNaN(dur)) {
+          if (!isNaN(dur) && row.style.display !== 'none') {
             totalFiles++;
             totalDuration += dur;
           }
@@ -125,26 +135,27 @@ fetch('metadata.json')
         `Файлов: ${totalFiles}, общая длительность: ${totalDuration.toFixed(1)} сек`;
     }
 
-    // Фильтр по тексту и ID
+    // Фильтр
     document.getElementById('filterInput').addEventListener('input', function() {
       const filter = this.value.toLowerCase();
       for (const speakerId in grouped) {
         const table = document.getElementById(`table-${speakerId}`);
         const rows = table.querySelectorAll('tbody tr');
         rows.forEach(row => {
-          const text = row.cells[0].innerText + " " + row.cells[1].innerText;
+          const text = row.cells[0].innerText + " " + row.cells[1].innerText + " " + row.cells[3].innerText;
           row.style.display = text.toLowerCase().includes(filter) ? '' : 'none';
         });
       }
+      updateStats();
     });
 
-    // Сортировка таблицы
+    // Сортировка
     window.sortTable = function(speakerId, colIndex) {
       const table = document.getElementById(`table-${speakerId}`);
       const tbody = table.querySelector('tbody');
       const rows = Array.from(tbody.querySelectorAll('tr'));
       const asc = !table.asc;
-      rows.sort((a, b) => {
+      rows.sort((a,b) => {
         const valA = a.cells[colIndex].innerText.toLowerCase();
         const valB = b.cells[colIndex].innerText.toLowerCase();
         return (valA > valB ? 1 : -1) * (asc ? 1 : -1);
