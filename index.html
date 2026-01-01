@@ -4,8 +4,9 @@
 <meta charset="UTF-8">
 <title>Sonus Mentis</title>
 
+<!-- Подключаем Source Sans Pro -->
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
-  
+
 <style>
 :root {
   --main-color: #4A90E2;
@@ -16,7 +17,7 @@
 }
 
 body {
-  font-family:'Source Sans Pro', Arial, sans-serif;
+  font-family: 'Source Sans Pro', Arial, sans-serif;
   margin: 40px;
   background-color: var(--bg-color);
   color: var(--text-color);
@@ -28,19 +29,25 @@ p { margin-bottom: 20px; }
 #menu {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
+  gap: 20px;
 }
 
+/* Карточки диагнозов */
 .menu-item {
   background-color: var(--main-color);
   color: white;
-  padding: 15px;
+  padding: 20px;
   border-radius: 12px;
-  text-align: center;
+  text-decoration: none;
   font-weight: bold;
+  font-size: 18px;
+  text-align: center; /* центрируем текст */
+  display: flex;
+  justify-content: center; /* центр по горизонтали */
+  align-items: center;     /* центр по вертикали */
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   transition: transform 0.2s, background-color 0.2s;
-  text-decoration: none;
+  height: 100px; /* фиксированная высота карточки для ровного центрирования */
 }
 .menu-item:hover {
   transform: scale(1.05);
