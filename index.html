@@ -52,6 +52,7 @@ fetch('metadata.json')
       const a = document.createElement('a');
       a.href = `diagnosis.html?d=${encodeURIComponent(diag)}`;
       a.className = 'menu-item';
+      a.innerText = `{diag}`;
       menu.appendChild(a);
     }
   });
