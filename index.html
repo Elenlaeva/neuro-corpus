@@ -4,54 +4,69 @@
 <meta charset="UTF-8">
 <title>Sonus Mentis</title>
 
-<!-- Подключаем Source Sans Pro -->
+<!-- Source Sans Pro -->
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
 :root {
   --main-color: #4A90E2;
+  --dark-color: #1C2B4A;
   --light-color: #E6F0FA;
   --bg-color: #F2F8FF;
-  --text-color: #1C2B4A;
-  --highlight-color: #CDE6FF;
 }
 
 body {
   font-family: 'Source Sans Pro', Arial, sans-serif;
   margin: 40px;
   background-color: var(--bg-color);
-  color: var(--text-color);
+  color: var(--dark-color);
 }
 
-h1 { 
-  margin-bottom: 10px; 
+/* Заголовок */
+h1 {
+  font-size: 52px;          /* стало заметно больше */
   font-weight: 700;
-  font-size: 36px;
+  margin-bottom: 10px;
 }
 
-p.subtitle {
+/* Подпись */
+.subtitle {
+  font-size: 19px;
   font-weight: 500;
-  font-size: 18px;
-  color: #1C2B4A;
-  margin-top: -5px;
   margin-bottom: 20px;
 }
 
-/* Слегка выделенный блок для инструкции "Выберите диагноз" */
-p.instructions {
-  background-color: #E6F0FA; 
-  padding: 12px 15px;
-  border-radius: 10px;
+/* Кнопка информации */
+.info-button {
+  display: inline-block;
+  background-color: var(--light-color);
+  color: var(--dark-color);
+  padding: 14px 24px;
+  border-radius: 12px;
   font-weight: 600;
-  font-size: 18px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  text-decoration: none;
+  margin-bottom: 30px;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  transition: background-color 0.2s, transform 0.2s;
+}
+.info-button:hover {
+  background-color: #D4E7FB;
+  transform: translateY(-2px);
 }
 
-/* Сетка для кнопок */
+/* Инструкция */
+.instructions {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* Сетка диагнозов */
 #menu {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 20px;
 }
 
@@ -59,22 +74,22 @@ p.instructions {
 .menu-item {
   background-color: var(--main-color);
   color: white;
-  padding: 20px;
-  border-radius: 12px;
-  text-decoration: none;
-  font-weight: bold;
-  font-size: 18px;
-  text-align: center;
+  border-radius: 14px;
+  height: 110px;
   display: flex;
-  justify-content: center; /* горизонтальное центрирование */
-  align-items: center;     /* вертикальное центрирование */
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 15px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   transition: transform 0.2s, background-color 0.2s;
-  height: 100px; /* фиксированная высота для ровного центрирования текста */
 }
 .menu-item:hover {
-  transform: scale(1.05);
   background-color: #357ABD;
+  transform: scale(1.05);
 }
 </style>
 </head>
@@ -82,7 +97,14 @@ p.instructions {
 <body>
 
 <h1>Sonus Mentis</h1>
-<p class="subtitle">Первый корпус речи русскоязычных пациентов с нейродегенеративными заболеваниями</p>
+<p class="subtitle">
+  Первый корпус речи русскоязычных пациентов с нейродегенеративными заболеваниями
+</p>
+
+<a href="about.html" class="info-button">
+  ℹ️ Информация о проекте
+</a>
+
 <p class="instructions">Выберите диагноз:</p>
 
 <div id="menu"></div>
@@ -92,22 +114,15 @@ fetch('metadata.json')
   .then(r => r.json())
   .then(data => {
     const menu = document.getElementById('menu');
+    const diagnoses = [...new Set(data.map(x => x.diagnosis))];
 
-    // Группируем по диагнозу
-    const grouped = {};
-    data.forEach(x => {
-      if (!grouped[x.diagnosis]) grouped[x.diagnosis] = { count: 0, total: 0 };
-      grouped[x.diagnosis].count += 1;
-      grouped[x.diagnosis].total += x.duration;
-    });
-
-    for (const diag in grouped) {
+    diagnoses.forEach(diag => {
       const a = document.createElement('a');
       a.href = `diagnosis.html?d=${encodeURIComponent(diag)}`;
       a.className = 'menu-item';
       a.innerText = diag;
       menu.appendChild(a);
-    }
+    });
   });
 </script>
 
