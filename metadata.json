@@ -2,24 +2,30 @@
   {
     "id": "AD_0001.wav",
     "text": "СР-1",
-    "speaker": "Ж/89/среднее",
-    "duration": 0.0,
+    "speaker": "AD-0001",
+    "sex": "женский",
+    "age": "89", 
+    "education": "среднее",
     "diagnosis": "Болезнь Альцгеймера",
     "diagnosis_comment": "Деменция умеренной степени"
   },
   {
     "id": "AD_0002.wav",
     "text": "СР-2",
-    "speaker": "Ж/89/среднее",
-    "duration": 0.0,
+    "speaker": "AD-0001",
+    "sex": "женский",
+    "age": "89", 
+    "education": "среднее",
     "diagnosis": "Болезнь Альцгеймера",
     "diagnosis_comment": "Деменция умеренной степени"
   },
     {
     "id": "ICAD_0001.wav",
     "text": "СР-1",
-    "speaker": "М/82/высшее",
-    "duration": 0.0,
+    "speaker": "ICAD–0001",
+    "sex": "мужской",
+    "age": "82", 
+    "education": "высшее",
     "diagnosis": "Церебральный атеросклероз",
     "diagnosis_comment": "Умеренные когнитивные нарушения"
    }
