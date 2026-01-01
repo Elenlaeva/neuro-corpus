@@ -37,7 +37,8 @@ document.getElementById('title').innerText = diagnosis;
 fetch('metadata.json')
   .then(r => r.json())
   .then(data => {
-    let items = data.filter(x => x.diagnosis === diagnosis);
+    // Фильтруем по диагнозу
+    const items = data.filter(x => x.diagnosis === diagnosis);
     const container = document.getElementById('tables');
 
     // Группируем по speaker
@@ -47,20 +48,27 @@ fetch('metadata.json')
       grouped[x.speaker].push(x);
     });
 
-    // Функция создания таблицы для каждого speaker
-    function createTable(speaker, group) {
+    // Создание таблицы для каждого speaker
+    function createTable(speakerId, group) {
+      const info = group[0]; // все записи одного speaker
+
       const h2 = document.createElement('h2');
-      h2.innerText = `Говорящий: ${speaker} (файлов: ${group.length})`;
+      h2.innerHTML = `
+        Говорящий ${speakerId} (файлов: ${group.length})<br>
+        Пол: ${info.sex}<br>
+        Возраст: ${info.age}<br>
+        Образование: ${info.education}
+      `;
       container.appendChild(h2);
 
       const table = document.createElement('table');
-      table.id = `table-${speaker}`;
+      table.id = `table-${speakerId}`;
 
       const thead = document.createElement('thead');
       thead.innerHTML = `
         <tr>
-          <th onclick="sortTable('${speaker}', 0)">ID файла ▲▼</th>
-          <th onclick="sortTable('${speaker}', 1)">Текст ▲▼</th>
+          <th onclick="sortTable('${speakerId}', 0)">ID файла ▲▼</th>
+          <th onclick="sortTable('${speakerId}', 1)">Текст ▲▼</th>
           <th>Длительность (сек)</th>
           <th>Комментарий к диагнозу</th>
           <th>Аудио</th>
@@ -83,27 +91,27 @@ fetch('metadata.json')
       table.appendChild(tbody);
       container.appendChild(table);
 
-      // Автоматическое вычисление duration для аудио
+      // Автоматическое вычисление duration аудио
       const audios = table.querySelectorAll('audio');
       audios.forEach((audio, i) => {
         audio.onloadedmetadata = () => {
           tbody.rows[i].cells[2].innerText = audio.duration.toFixed(1);
           updateStats();
-        }
+        };
       });
     }
 
-    // Создаем таблицы
-    for (const speaker in grouped) {
-      createTable(speaker, grouped[speaker]);
+    // Создаём все таблицы
+    for (const speakerId in grouped) {
+      createTable(speakerId, grouped[speakerId]);
     }
 
     // Обновление общей статистики
     function updateStats() {
       let totalFiles = 0;
       let totalDuration = 0;
-      for (const speaker in grouped) {
-        const table = document.getElementById(`table-${speaker}`);
+      for (const speakerId in grouped) {
+        const table = document.getElementById(`table-${speakerId}`);
         const rows = table.querySelectorAll('tbody tr');
         rows.forEach(row => {
           const dur = parseFloat(row.cells[2].innerText);
@@ -117,11 +125,11 @@ fetch('metadata.json')
         `Файлов: ${totalFiles}, общая длительность: ${totalDuration.toFixed(1)} сек`;
     }
 
-    // Фильтр
+    // Фильтр по тексту и ID
     document.getElementById('filterInput').addEventListener('input', function() {
       const filter = this.value.toLowerCase();
-      for (const speaker in grouped) {
-        const table = document.getElementById(`table-${speaker}`);
+      for (const speakerId in grouped) {
+        const table = document.getElementById(`table-${speakerId}`);
         const rows = table.querySelectorAll('tbody tr');
         rows.forEach(row => {
           const text = row.cells[0].innerText + " " + row.cells[1].innerText;
@@ -131,8 +139,8 @@ fetch('metadata.json')
     });
 
     // Сортировка таблицы
-    window.sortTable = function(speaker, colIndex) {
-      const table = document.getElementById(`table-${speaker}`);
+    window.sortTable = function(speakerId, colIndex) {
+      const table = document.getElementById(`table-${speakerId}`);
       const tbody = table.querySelector('tbody');
       const rows = Array.from(tbody.querySelectorAll('tr'));
       const asc = !table.asc;
