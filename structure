@@ -1,0 +1,11 @@
+audio-corpus/
+│
+├── index.html        # главная страница
+├── metadata.json     # разметка
+├── audio/
+│   ├── audio_0001.wav
+│   ├── audio_0002.wav
+│   └── audio_0003.wav
+│   └── audio_0004.wav
+│   └── audio_0005.wav
+└── README.md
