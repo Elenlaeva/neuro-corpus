@@ -23,9 +23,23 @@ body {
   color: var(--text-color);
 }
 
-h1 { margin-bottom: 10px; }
-p { margin-bottom: 20px; }
+h1 { 
+  margin-bottom: 15px; 
+  font-weight: 700;
+}
 
+p.subtitle {
+  background-color: #E6F0FA; /* светлый голубой фон */
+  padding: 12px 15px;
+  border-radius: 10px;
+  font-weight: 600;
+  color: #1C2B4A;
+  font-size: 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* лёгкая тень */
+}
+
+/* Сетка для кнопок */
 #menu {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -41,13 +55,13 @@ p { margin-bottom: 20px; }
   text-decoration: none;
   font-weight: bold;
   font-size: 18px;
-  text-align: center; /* центрируем текст */
+  text-align: center;
   display: flex;
-  justify-content: center; /* центр по горизонтали */
-  align-items: center;     /* центр по вертикали */
+  justify-content: center; /* горизонтальное центрирование */
+  align-items: center;     /* вертикальное центрирование */
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   transition: transform 0.2s, background-color 0.2s;
-  height: 100px; /* фиксированная высота карточки для ровного центрирования */
+  height: 100px; /* фиксированная высота для ровного центрирования текста */
 }
 .menu-item:hover {
   transform: scale(1.05);
@@ -59,8 +73,12 @@ p { margin-bottom: 20px; }
 <body>
 
 <h1>Sonus Mentis</h1>
-<p>Первый корпус речи русскоязычных пациентов с нейродегенеративными заболеваниями</p>
-<p>Выберите диагноз:</p>
+<p class="subtitle">
+  Первый корпус речи русскоязычных пациентов с нейродегенеративными заболеваниями
+</p>
+<p class="subtitle">
+  Выберите диагноз:
+</p>
 
 <div id="menu"></div>
 
