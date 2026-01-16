@@ -170,9 +170,9 @@ fetch('metadata.json')
         <td>${x.text}</td>
         <td>—</td>
         <td>${x.diagnosis_comment || ''}</td>
-        <td><audio controls src="audio/${x.id}"></audio></td>
+        <audio controls src="${x.audio_url}"></audio>
         <td>
-          <a href="textgrid/${x.id.replace('.wav','.TextGrid')}" download>
+          <a href="${x.textgrid_url}" download>
             Скачать
           </a>
         </td>
@@ -214,10 +214,27 @@ fetch('metadata.json')
     updateStats();
   });
 
-  document.getElementById('downloadAll').addEventListener('click', async () => {
-    const zip = new JSZip();
-    const af = zip.folder("audio");
-    const tf = zip.folder("textgrid");
+  <script>
+document.getElementById('downloadAll').addEventListener('click', () => {
+  const diagnosis = new URLSearchParams(window.location.search).get('d');
+
+  // соответствие диагноз → папка Google Drive
+  const driveFolders = {
+    "Болезнь Альцгеймера": "1VuHYbLRQWTbruKh5iyOxCg2M1JZJf85S",
+    "Церебральный атеросклероз": "1VuHYbLRQWTbruKh5iyOxCg2M1JZJf85S"
+  };
+
+  const folderId = driveFolders[diagnosis];
+  if (!folderId) {
+    alert("Папка для этого диагноза не найдена");
+    return;
+  }
+
+  const url = `https://drive.google.com/drive/folders/${folderId}`;
+  window.open(url, "_blank");
+});
+</script>
+
 
     for (const x of items) {
       af.file(x.id, await (await fetch(`audio/${x.id}`)).blob());
