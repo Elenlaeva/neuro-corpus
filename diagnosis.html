@@ -4,8 +4,11 @@
 <meta charset="UTF-8">
 <title>Диагноз</title>
 
-<!-- Подключаем Source Sans Pro -->
+<!-- Source Sans Pro -->
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+
+<!-- JSZip -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
 <style>
 :root {
@@ -15,38 +18,6 @@
   --text-color: #1C2B4A;
   --highlight-color: #CDE6FF;
 }
-  
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
-document.getElementById('downloadAll').addEventListener('click', async () => {
-  const zip = new JSZip();
-  const audioFolder = zip.folder("audio");
-  const tgFolder = zip.folder("textgrid");
-
-  const files = data.filter(x => x.diagnosis === diagnosis);
-
-  for (const x of files) {
-    // WAV
-    const wavResponse = await fetch(`audio/${x.id}`);
-    audioFolder.file(x.id, await wavResponse.blob());
-
-    // TextGrid
-    const tgName = x.id.replace('.wav', '.TextGrid');
-    const tgResponse = await fetch(`textgrid/${tgName}`);
-    tgFolder.file(tgName, await tgResponse.blob());
-  }
-
-  const blob = await zip.generateAsync({ type: "blob" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${diagnosis}.zip`;
-  a.click();
-
-  URL.revokeObjectURL(url);
-});
-
 
 body {
   font-family: 'Source Sans Pro', Arial, sans-serif;
@@ -62,15 +33,24 @@ a.back {
   color: var(--main-color);
   font-weight: bold;
 }
-a.back:hover {
-  text-decoration: underline;
-}
+a.back:hover { text-decoration: underline; }
 
 h1 { margin-bottom: 5px; }
 h2 { margin-top: 30px; }
 
+/* Фильтр */
+.filter {
+  padding: 8px 12px;
+  width: 350px;
+  border-radius: 12px;
+  border: 1px solid var(--main-color);
+  margin-bottom: 10px;
+  font-family: 'Source Sans Pro', Arial, sans-serif;
+}
+
+/* Кнопка скачивания */
 .download-btn {
-  background-color: #4A90E2;
+  background-color: var(--main-color);
   color: white;
   border: none;
   padding: 12px 20px;
@@ -79,36 +59,14 @@ h2 { margin-top: 30px; }
   font-weight: 600;
   cursor: pointer;
   margin-bottom: 25px;
-  transition: background-color 0.2s, transform 0.2s;
 }
+.download-btn:hover { background-color: #357ABD; }
 
-.download-btn:hover {
-  background-color: #357ABD;
-  transform: translateY(-2px);
-}
-
-/* Фильтр */
-.filter {
-  padding: 8px 12px;
-  width: 350px;
-  border-radius: 12px;
-  border: 1px solid var(--main-color);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  margin-bottom: 15px;
-  font-family: 'Source Sans Pro', Arial, sans-serif;
-}
-.filter:focus {
-  outline: none;
-  border-color: #357ABD;
-}
-
-/* Таблицы оставляем в стандартном шрифте */
+/* Таблицы — стандартный шрифт */
 table {
   border-collapse: collapse;
   width: 100%;
   margin-top: 10px;
-  border-radius: 12px;
-  overflow: hidden;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
@@ -116,20 +74,17 @@ th, td {
   border: 1px solid #ccc;
   padding: 8px;
   text-align: left;
-  cursor: pointer;
-  font-family: Arial, sans-serif; /* таблицы остаются без Source Sans Pro */
+  font-family: Arial, sans-serif;
 }
 
 th { background-color: var(--light-color); }
-
 tr:hover { background-color: var(--highlight-color); }
 
-/* Цвета по тяжести диагноза */
 .low { background-color: #D9F0FF; }
 .medium { background-color: #A3D2FF; }
 .high { background-color: #4A90E2; color: white; }
 
-audio { width: 180px; border-radius: 8px; }
+audio { width: 180px; }
 </style>
 </head>
 
@@ -139,7 +94,8 @@ audio { width: 180px; border-radius: 8px; }
 <h1 id="title"></h1>
 <p id="stats"></p>
 
-<input type="text" id="filterInput" class="filter" placeholder="Фильтр по тексту, ID или комментариям">
+<input type="text" id="filterInput" class="filter"
+       placeholder="Фильтр по тексту, ID или комментариям">
 
 <button id="downloadAll" class="download-btn">
   Скачать весь архив
@@ -153,138 +109,124 @@ const diagnosis = params.get('d');
 document.getElementById('title').innerText = diagnosis;
 
 fetch('metadata.json')
-  .then(r => r.json())
-  .then(data => {
-    const items = data.filter(x => x.diagnosis === diagnosis);
-    const container = document.getElementById('tables');
+.then(r => r.json())
+.then(data => {
 
-    // Группируем по speaker
-    const grouped = {};
-    items.forEach(x => {
-      if (!grouped[x.speaker]) grouped[x.speaker] = [];
-      grouped[x.speaker].push(x);
-    });
+  const items = data.filter(x => x.diagnosis === diagnosis);
+  const container = document.getElementById('tables');
 
-    function createTable(speakerId, group) {
-      const info = group[0];
+  const grouped = {};
+  items.forEach(x => {
+    if (!grouped[x.speaker]) grouped[x.speaker] = [];
+    grouped[x.speaker].push(x);
+  });
 
-      const h2 = document.createElement('h2');
-      h2.innerHTML = `
-        Говорящий ${speakerId} (файлов: ${group.length})<br>
-        Пол: ${info.sex}<br>
-        Возраст: ${info.age}<br>
-        Образование: ${info.education}
-      `;
-      container.appendChild(h2);
+  function createTable(speakerId, group) {
+    const info = group[0];
 
-      const table = document.createElement('table');
-      table.id = `table-${speakerId}`;
+    const h2 = document.createElement('h2');
+    h2.innerHTML = `
+      Говорящий ${speakerId} (файлов: ${group.length})<br>
+      Пол: ${info.sex}<br>
+      Возраст: ${info.age}<br>
+      Образование: ${info.education}
+    `;
+    container.appendChild(h2);
 
-      const thead = document.createElement('thead');
-      thead.innerHTML = `
+    const table = document.createElement('table');
+    table.id = `table-${speakerId}`;
+
+    table.innerHTML = `
+      <thead>
         <tr>
-          <th onclick="sortTable('${speakerId}', 0)">ID файла ▲▼</th>
-          <th onclick="sortTable('${speakerId}', 1)">Текст ▲▼</th>
-          <th onclick="sortTable('${speakerId}', 2)">Длительность ▲▼</th>
-          <th onclick="sortTable('${speakerId}', 3)">Комментарий ▲▼</th>
+          <th>ID файла</th>
+          <th>Текст</th>
+          <th>Длительность</th>
+          <th>Комментарий</th>
           <th>Аудио</th>
           <th>TextGrid</th>
         </tr>
+      </thead>
+    `;
+
+    const tbody = document.createElement('tbody');
+
+    group.forEach(x => {
+      const tr = document.createElement('tr');
+
+      let cls = 'low';
+      if (x.diagnosis_comment?.toLowerCase().includes('умеренной')) cls = 'medium';
+      if (x.diagnosis_comment?.toLowerCase().includes('тяжелой')) cls = 'high';
+      tr.className = cls;
+
+      tr.innerHTML = `
+        <td>${x.id}</td>
+        <td>${x.text}</td>
+        <td>—</td>
+        <td>${x.diagnosis_comment || ''}</td>
+        <td><audio controls src="audio/${x.id}"></audio></td>
+        <td>
+          <a href="textgrid/${x.id.replace('.wav','.TextGrid')}" download>
+            Скачать
+          </a>
+        </td>
       `;
-      table.appendChild(thead);
-
-      const tbody = document.createElement('tbody');
-      group.forEach(x => {
-        const tr = document.createElement('tr');
-
-        let severityClass = '';
-        if (x.diagnosis_comment.toLowerCase().includes('умеренной')) severityClass = 'medium';
-        else if (x.diagnosis_comment.toLowerCase().includes('тяжелой')) severityClass = 'high';
-        else severityClass = 'low';
-
-        tr.className = severityClass;
-
-        tr.innerHTML = `
-          <td>${x.id}</td>
-          <td>${x.text}</td>
-          <td>—</td>
-          <td>${x.diagnosis_comment || ''}</td>
-          <td>
-            <a href="textgrid/${x.id.replace('.wav', '.TextGrid')}" download>
-              Скачать
-            </a>
-          </td>
-          <td>
-            <audio controls src="audio/${x.id}"></audio>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-      table.appendChild(tbody);
-      container.appendChild(table);
-
-      // Авто-длительность
-      const audios = table.querySelectorAll('audio');
-      audios.forEach((audio, i) => {
-        audio.onloadedmetadata = () => {
-          tbody.rows[i].cells[2].innerText = audio.duration.toFixed(1);
-          updateStats();
-        };
-      });
-    }
-
-    for (const speakerId in grouped) {
-      createTable(speakerId, grouped[speakerId]);
-    }
-
-    function updateStats() {
-      let totalFiles = 0;
-      let totalDuration = 0;
-      for (const speakerId in grouped) {
-        const table = document.getElementById(`table-${speakerId}`);
-        const rows = table.querySelectorAll('tbody tr');
-        rows.forEach(row => {
-          const dur = parseFloat(row.cells[2].innerText);
-          if (!isNaN(dur) && row.style.display !== 'none') {
-            totalFiles++;
-            totalDuration += dur;
-          }
-        });
-      }
-      document.getElementById('stats').innerText =
-        `Файлов: ${totalFiles}, общая длительность: ${totalDuration.toFixed(1)} сек`;
-    }
-
-    // Фильтр
-    document.getElementById('filterInput').addEventListener('input', function() {
-      const filter = this.value.toLowerCase();
-      for (const speakerId in grouped) {
-        const table = document.getElementById(`table-${speakerId}`);
-        const rows = table.querySelectorAll('tbody tr');
-        rows.forEach(row => {
-          const text = row.cells[0].innerText + " " + row.cells[1].innerText + " " + row.cells[3].innerText;
-          row.style.display = text.toLowerCase().includes(filter) ? '' : 'none';
-        });
-      }
-      updateStats();
+      tbody.appendChild(tr);
     });
 
-    // Сортировка
-    window.sortTable = function(speakerId, colIndex) {
-      const table = document.getElementById(`table-${speakerId}`);
-      const tbody = table.querySelector('tbody');
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      const asc = !table.asc;
-      rows.sort((a,b) => {
-        const valA = a.cells[colIndex].innerText.toLowerCase();
-        const valB = b.cells[colIndex].innerText.toLowerCase();
-        return (valA > valB ? 1 : -1) * (asc ? 1 : -1);
-      });
-      rows.forEach(r => tbody.appendChild(r));
-      table.asc = asc;
+    table.appendChild(tbody);
+    container.appendChild(table);
+
+    table.querySelectorAll('audio').forEach((a,i)=>{
+      a.onloadedmetadata = ()=>{
+        tbody.rows[i].cells[2].innerText = a.duration.toFixed(1);
+        updateStats();
+      };
+    });
+  }
+
+  Object.keys(grouped).forEach(id => createTable(id, grouped[id]));
+
+  function updateStats() {
+    let files = 0, dur = 0;
+    document.querySelectorAll('tbody tr').forEach(r=>{
+      const d = parseFloat(r.cells[2].innerText);
+      if (!isNaN(d) && r.style.display !== 'none') {
+        files++; dur += d;
+      }
+    });
+    document.getElementById('stats').innerText =
+      `Файлов: ${files}, общая длительность: ${dur.toFixed(1)} сек`;
+  }
+
+  document.getElementById('filterInput').addEventListener('input', e=>{
+    const f = e.target.value.toLowerCase();
+    document.querySelectorAll('tbody tr').forEach(r=>{
+      r.style.display =
+        (r.innerText.toLowerCase().includes(f)) ? '' : 'none';
+    });
+    updateStats();
+  });
+
+  document.getElementById('downloadAll').addEventListener('click', async () => {
+    const zip = new JSZip();
+    const af = zip.folder("audio");
+    const tf = zip.folder("textgrid");
+
+    for (const x of items) {
+      af.file(x.id, await (await fetch(`audio/${x.id}`)).blob());
+      const tg = x.id.replace('.wav','.TextGrid');
+      tf.file(tg, await (await fetch(`textgrid/${tg}`)).blob());
     }
 
+    const blob = await zip.generateAsync({type:'blob'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${diagnosis}.zip`;
+    a.click();
   });
+
+});
 </script>
 
 </body>
