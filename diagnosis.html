@@ -195,12 +195,13 @@ fetch('metadata.json')
         <td>—</td>
         <td>${x.diagnosis_comment || ''}</td>
         <td>
-          <td>${demoCell}</td>
+          ${x.demo_audio ? `<audio controls src="${x.demo_audio}"></audio>
+                            <div class="demo-note">демо</div>` : '—'}
         </td>
         <td>
           <a href="${x.textgrid_url}" download>Скачать</a>
         </td>
-      `;
+        `;
 
       tbody.appendChild(tr);
     });
