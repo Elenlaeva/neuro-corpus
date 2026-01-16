@@ -1,11 +1,14 @@
 audio-corpus/
 │
-├── index.html        # главная страница
-├── metadata.json     # разметка
+├── index.html      # главная страница
+├── diagnosis.html
+├── metadata.json   # разметка
 ├── audio/
-│   ├── audio_0001.wav
-│   ├── audio_0002.wav
-│   └── audio_0003.wav
-│   └── audio_0004.wav
-│   └── audio_0005.wav
-└── README.md
+│   ├── AD_0001.wav
+│   ├── AD_0002.wav
+│
+├── textgrid/
+│   ├── AD_0001.TextGrid
+│   ├── AD_0002.TextGrid
+│
+└── about.html
