@@ -15,6 +15,38 @@
   --text-color: #1C2B4A;
   --highlight-color: #CDE6FF;
 }
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+document.getElementById('downloadAll').addEventListener('click', async () => {
+  const zip = new JSZip();
+  const audioFolder = zip.folder("audio");
+  const tgFolder = zip.folder("textgrid");
+
+  const files = data.filter(x => x.diagnosis === diagnosis);
+
+  for (const x of files) {
+    // WAV
+    const wavResponse = await fetch(`audio/${x.id}`);
+    audioFolder.file(x.id, await wavResponse.blob());
+
+    // TextGrid
+    const tgName = x.id.replace('.wav', '.TextGrid');
+    const tgResponse = await fetch(`textgrid/${tgName}`);
+    tgFolder.file(tgName, await tgResponse.blob());
+  }
+
+  const blob = await zip.generateAsync({ type: "blob" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${diagnosis}.zip`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+});
+
 
 body {
   font-family: 'Source Sans Pro', Arial, sans-serif;
@@ -36,6 +68,24 @@ a.back:hover {
 
 h1 { margin-bottom: 5px; }
 h2 { margin-top: 30px; }
+
+.download-btn {
+  background-color: #4A90E2;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 25px;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.download-btn:hover {
+  background-color: #357ABD;
+  transform: translateY(-2px);
+}
 
 /* Фильтр */
 .filter {
@@ -138,6 +188,7 @@ fetch('metadata.json')
           <th onclick="sortTable('${speakerId}', 2)">Длительность ▲▼</th>
           <th onclick="sortTable('${speakerId}', 3)">Комментарий ▲▼</th>
           <th>Аудио</th>
+          <th>TextGrid</th>
         </tr>
       `;
       table.appendChild(thead);
@@ -158,7 +209,14 @@ fetch('metadata.json')
           <td>${x.text}</td>
           <td>—</td>
           <td>${x.diagnosis_comment || ''}</td>
-          <td><audio controls src="audio/${x.id}"></audio></td>
+          <td>
+            <a href="textgrid/${x.id.replace('.wav', '.TextGrid')}" download>
+              Скачать
+            </a>
+          </td>
+          <td>
+            <audio controls src="audio/${x.id}"></audio>
+          </td>
         `;
         tbody.appendChild(tr);
       });
