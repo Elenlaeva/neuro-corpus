@@ -190,7 +190,25 @@ fetch('metadata.json')
         <td>—</td>
         <td>${x.diagnosis_comment || ''}</td>
         <td>
-          <audio controls src="${x.audio_url}"></audio>
+          <tr>
+  <td>${x.id}</td>
+  <td>${x.text}</td>
+  <td>—</td>
+  <td>${x.diagnosis_comment || ''}</td>
+
+  <!-- ДЕМО -->
+  <td>
+    ${x.demo_audio
+      ? `<audio controls src="${x.demo_audio}"></audio>`
+      : '—'}
+  </td>
+
+  <!-- СКАЧИВАНИЕ -->
+  <td>
+    <a href="${x.audio_url}" target="_blank">WAV</a><br>
+    <a href="${x.textgrid_url}" target="_blank">TextGrid</a>
+  </td>
+</tr>
         </td>
         <td>
           <a href="${x.textgrid_url}" download>Скачать</a>
