@@ -184,13 +184,18 @@ fetch('metadata.json')
       const tr = document.createElement('tr');
       tr.className = cls;
 
+      const demoCell = x.demo_audio
+        ? `<audio controls src="${x.demo_audio}"></audio>
+           <div class="demo-note">демо</div>`
+        : '—';
+
       tr.innerHTML = `
         <td>${x.id}</td>
         <td>${x.text}</td>
         <td>—</td>
         <td>${x.diagnosis_comment || ''}</td>
         <td>
-          <audio controls src="${x.audio_url}"></audio>
+          <td>${demoCell}</td>
         </td>
         <td>
           <a href="${x.textgrid_url}" download>Скачать</a>
