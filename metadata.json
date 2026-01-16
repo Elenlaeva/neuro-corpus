@@ -10,6 +10,16 @@
     "diagnosis_comment": "Деменция умеренной степени"
   },
   {
+    "id": "AD_0001_1.TextGrid",
+    "text": "СР-1",
+    "speaker": "AD-0001",
+    "sex": "женский",
+    "age": "89", 
+    "education": "среднее",
+    "diagnosis": "Болезнь Альцгеймера",
+    "diagnosis_comment": "Деменция умеренной степени"
+  },
+  {
     "id": "AD_0001_2.wav",
     "text": "СР-2",
     "speaker": "AD-0001",
