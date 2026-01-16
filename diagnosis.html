@@ -196,7 +196,7 @@ fetch('metadata.json')
         <td>${x.diagnosis_comment || ''}</td>
         <td>
           ${x.demo_audio ? `<audio controls src="${x.demo_audio}"></audio>
-                            <div class="demo-note">демо</div>` : '—'}
+                            <div class="demo-note"></div>` : '—'}
         </td>
         <td>
           <a href="${x.textgrid_url}" download>Скачать</a>
