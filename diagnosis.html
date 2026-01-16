@@ -7,9 +7,6 @@
 <!-- Source Sans Pro -->
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
 
-<!-- JSZip -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
 <style>
 :root {
   --main-color: #4A90E2;
@@ -26,26 +23,33 @@ body {
   color: var(--text-color);
 }
 
+/* Назад */
 a.back {
   display: inline-block;
   margin-bottom: 20px;
   text-decoration: none;
   color: var(--main-color);
-  font-weight: bold;
+  font-weight: 600;
 }
 a.back:hover { text-decoration: underline; }
 
+/* Заголовок диагноза */
 #title {
   font-size: 44px;
   font-weight: 700;
   margin-bottom: 6px;
 }
-h2 { margin-top: 30px; }
+
+#stats {
+  margin-bottom: 20px;
+  font-size: 16px;
+}
 
 /* Фильтр */
 .filter {
-  padding: 8px 12px;
-  width: 350px;
+  display: block;
+  padding: 10px 14px;
+  width: 360px;
   border-radius: 12px;
   border: 1px solid var(--main-color);
   margin-bottom: 10px;
@@ -59,14 +63,21 @@ h2 { margin-top: 30px; }
   color: white;
   border: none;
   padding: 12px 20px;
-  border-radius: 12px;
+  border-radius: 14px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 10px;
-  margin-bottom: 25px;
+  margin-bottom: 30px;
 }
-download-btn:hover { background-color: #357ABD; }
+.download-btn:hover {
+  background-color: #357ABD;
+}
+
+/* Заголовки говорящих */
+h2 {
+  margin-top: 35px;
+  font-size: 22px;
+}
 
 /* Таблицы — стандартный шрифт */
 table {
@@ -74,6 +85,7 @@ table {
   width: 100%;
   margin-top: 10px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  background: white;
 }
 
 th, td {
@@ -97,11 +109,16 @@ audio { width: 180px; }
 <body>
 
 <a href="index.html" class="back">← Назад к меню</a>
+
 <h1 id="title"></h1>
 <p id="stats"></p>
 
-<input type="text" id="filterInput" class="filter"
-       placeholder="Фильтр по тексту, ID или комментариям">
+<input
+  type="text"
+  id="filterInput"
+  class="filter"
+  placeholder="Фильтр по тексту, ID или комментариям"
+>
 
 <button id="downloadAll" class="download-btn">
   Скачать весь архив
@@ -110,10 +127,12 @@ audio { width: 180px; }
 <div id="tables"></div>
 
 <script>
+/* === Получаем диагноз === */
 const params = new URLSearchParams(window.location.search);
 const diagnosis = params.get('d');
 document.getElementById('title').innerText = diagnosis;
 
+/* === Загружаем метаданные === */
 fetch('metadata.json')
 .then(r => r.json())
 .then(data => {
@@ -121,12 +140,14 @@ fetch('metadata.json')
   const items = data.filter(x => x.diagnosis === diagnosis);
   const container = document.getElementById('tables');
 
+  /* Группировка по говорящему */
   const grouped = {};
   items.forEach(x => {
     if (!grouped[x.speaker]) grouped[x.speaker] = [];
     grouped[x.speaker].push(x);
   });
 
+  /* Создание таблицы */
   function createTable(speakerId, group) {
     const info = group[0];
 
@@ -140,8 +161,6 @@ fetch('metadata.json')
     container.appendChild(h2);
 
     const table = document.createElement('table');
-    table.id = `table-${speakerId}`;
-
     table.innerHTML = `
       <thead>
         <tr>
@@ -158,11 +177,11 @@ fetch('metadata.json')
     const tbody = document.createElement('tbody');
 
     group.forEach(x => {
-      const tr = document.createElement('tr');
-
       let cls = 'low';
       if (x.diagnosis_comment?.toLowerCase().includes('умеренной')) cls = 'medium';
       if (x.diagnosis_comment?.toLowerCase().includes('тяжелой')) cls = 'high';
+
+      const tr = document.createElement('tr');
       tr.className = cls;
 
       tr.innerHTML = `
@@ -170,21 +189,23 @@ fetch('metadata.json')
         <td>${x.text}</td>
         <td>—</td>
         <td>${x.diagnosis_comment || ''}</td>
-        <audio controls src="${x.audio_url}"></audio>
         <td>
-          <a href="${x.textgrid_url}" download>
-            Скачать
-          </a>
+          <audio controls src="${x.audio_url}"></audio>
+        </td>
+        <td>
+          <a href="${x.textgrid_url}" download>Скачать</a>
         </td>
       `;
+
       tbody.appendChild(tr);
     });
 
     table.appendChild(tbody);
     container.appendChild(table);
 
-    table.querySelectorAll('audio').forEach((a,i)=>{
-      a.onloadedmetadata = ()=>{
+    /* Автодлительность */
+    table.querySelectorAll('audio').forEach((a, i) => {
+      a.onloadedmetadata = () => {
         tbody.rows[i].cells[2].innerText = a.duration.toFixed(1);
         updateStats();
       };
@@ -193,9 +214,10 @@ fetch('metadata.json')
 
   Object.keys(grouped).forEach(id => createTable(id, grouped[id]));
 
+  /* Статистика */
   function updateStats() {
     let files = 0, dur = 0;
-    document.querySelectorAll('tbody tr').forEach(r=>{
+    document.querySelectorAll('tbody tr').forEach(r => {
       const d = parseFloat(r.cells[2].innerText);
       if (!isNaN(d) && r.style.display !== 'none') {
         files++; dur += d;
@@ -205,23 +227,25 @@ fetch('metadata.json')
       `Файлов: ${files}, общая длительность: ${dur.toFixed(1)} сек`;
   }
 
-  document.getElementById('filterInput').addEventListener('input', e=>{
+  /* Фильтр */
+  document.getElementById('filterInput').addEventListener('input', e => {
     const f = e.target.value.toLowerCase();
-    document.querySelectorAll('tbody tr').forEach(r=>{
-      r.style.display =
-        (r.innerText.toLowerCase().includes(f)) ? '' : 'none';
+    document.querySelectorAll('tbody tr').forEach(r => {
+      r.style.display = r.innerText.toLowerCase().includes(f) ? '' : 'none';
     });
     updateStats();
   });
 
-  <script>
+});
+
+/* === КНОПКА "Скачать весь архив" (Google Drive) === */
 document.getElementById('downloadAll').addEventListener('click', () => {
+
   const diagnosis = new URLSearchParams(window.location.search).get('d');
 
-  // соответствие диагноз → папка Google Drive
   const driveFolders = {
-    "Болезнь Альцгеймера": "1VuHYbLRQWTbruKh5iyOxCg2M1JZJf85S",
-    "Церебральный атеросклероз": "1VuHYbLRQWTbruKh5iyOxCg2M1JZJf85S"
+    "Болезнь Альцгеймера": "I1VuHYbLRQWTbruKh5iyOxCg2M1JZJf85S",
+    "Церебральный атеросклероз": "-"
   };
 
   const folderId = driveFolders[diagnosis];
@@ -230,25 +254,10 @@ document.getElementById('downloadAll').addEventListener('click', () => {
     return;
   }
 
-  const url = `https://drive.google.com/drive/folders/${folderId}`;
-  window.open(url, "_blank");
-});
-</script>
-
-
-    for (const x of items) {
-      af.file(x.id, await (await fetch(`audio/${x.id}`)).blob());
-      const tg = x.id.replace('.wav','.TextGrid');
-      tf.file(tg, await (await fetch(`textgrid/${tg}`)).blob());
-    }
-
-    const blob = await zip.generateAsync({type:'blob'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `${diagnosis}.zip`;
-    a.click();
-  });
-
+  window.open(
+    `https://drive.google.com/drive/folders/${folderId}`,
+    "_blank"
+  );
 });
 </script>
 
