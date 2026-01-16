@@ -1,6 +1,6 @@
 [
   {
-    "id": "AD_0001_1.wav",
+    "id": "AD_0001_SS_1.wav",
     "text": "СР-1",
     "speaker": "AD-0001",
     "sex": "женский",
@@ -10,7 +10,7 @@
     "diagnosis_comment": "Деменция умеренной степени"
   },
   {
-    "id": "AD_0001_1.TextGrid",
+    "id": "AD_0001_SS_1.TextGrid",
     "text": "СР-1",
     "speaker": "AD-0001",
     "sex": "женский",
