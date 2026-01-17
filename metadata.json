@@ -52,13 +52,16 @@
     "textgrid_url": "https://drive.google.com/file/d/1UUS07nfKeCvzfMPTNIwkIWyL2Mc_g4FA/view?usp=sharing"
   },
     {
-    "id": "ICAD_0001_1.wav",
-    "text": "СР-1",
+    "id": "ICAD_0001_SV.wav",
+    "text": "ЧС-1",
     "speaker": "ICAD–0001",
     "sex": "мужской",
     "age": "82", 
     "education": "высшее",
     "diagnosis": "Церебральный атеросклероз",
-    "diagnosis_comment": "Умеренные когнитивные нарушения"
+    "diagnosis_comment": "Умеренные когнитивные нарушения",
+    "demo_audio": "demo_audio/ICAD_0001_SV.wav",
+    "audio_url": "https://drive.google.com/file/d/1ueoSMaHa8CMGCozzF4YxBotQBUK_KsuK/view?usp=sharing",
+    "textgrid_url": "https://drive.google.com/file/d/1Cp6ESiyFlVNsVQ4UscQpzS559_1RL1V6/view?usp=sharing"
    }
 ]
