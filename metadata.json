@@ -26,6 +26,19 @@
     "textgrid_url": "https://drive.google.com/file/d/1rDVM2y3ptCFxkCJZQtjF3O_sr2GvqxP2/view?usp=sharing"
   },
     {
+    "id": "AD_0001_VGUK",
+    "text": "ЧС-2",
+    "speaker": "AD-0001",
+    "sex": "женский",
+    "age": "89", 
+    "education": "среднее",
+    "diagnosis": "Болезнь Альцгеймера",
+    "diagnosis_comment": "Деменция умеренной степени", 
+    "demo_audio": "demo_audio/AD_0001_VGUK.wav",
+    "audio_url": "https://drive.google.com/file/d/1Kw1ViO5z0Jzct8GZynB6e96eh8dg9uqL/view?usp=sharing",
+    "textgrid_url": "https://drive.google.com/file/d/1pg1zVUIALPx0kOu88SPR6ElkXu8Xi36R/view?usp=sharing"
+  },
+    {
     "id": "AD_0002_1.wav",
     "text": "СР-1",
     "speaker": "AD-0002",
