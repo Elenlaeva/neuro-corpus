@@ -13,14 +13,17 @@
     "textgrid_url": "https://drive.google.com/file/d/1Cp6ESiyFlVNsVQ4UscQpzS559_1RL1V6/view?usp=sharing"
   },
   {
-    "id": "AD_0001_SS_2",
-    "text": "СР-2",
+    "id": "AD_0001_SV",
+    "text": "Стихотворение "Советы врачей"",
     "speaker": "AD-0001",
     "sex": "женский",
     "age": "89", 
     "education": "среднее",
     "diagnosis": "Болезнь Альцгеймера",
     "diagnosis_comment": "Деменция умеренной степени"
+    "demo_audio": "demo_audio/AD_0001_SV.wav",
+    "audio_url": "https://drive.google.com/file/d/1rDVM2y3ptCFxkCJZQtjF3O_sr2GvqxP2/view?usp=sharing",
+    "textgrid_url": "https://drive.google.com/file/d/1rDVM2y3ptCFxkCJZQtjF3O_sr2GvqxP2/view?usp=sharing"
   },
     {
     "id": "AD_0002_1.wav",
