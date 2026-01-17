@@ -39,14 +39,17 @@
     "textgrid_url": "https://drive.google.com/file/d/1pg1zVUIALPx0kOu88SPR6ElkXu8Xi36R/view?usp=sharing"
   },
     {
-    "id": "AD_0002_1.wav",
+    "id": "AD_0002_SS_1.wav",
     "text": "СР-1",
     "speaker": "AD-0002",
     "sex": "женский",
     "age": "76", 
     "education": "высшее",
     "diagnosis": "Болезнь Альцгеймера",
-    "diagnosis_comment": "Когнитивные нарушения альцгеймеровского типа"
+    "diagnosis_comment": "Когнитивные нарушения альцгеймеровского типа",
+    "demo_audio": "demo_audio/AD_0002_SS_1.wav",
+    "audio_url": "https://drive.google.com/file/d/10-V6YL4rihFK1ESu3OJDJCBPQhTTwKPc/view?usp=sharing",
+    "textgrid_url": "https://drive.google.com/file/d/1UUS07nfKeCvzfMPTNIwkIWyL2Mc_g4FA/view?usp=sharing"
   },
     {
     "id": "ICAD_0001_1.wav",
