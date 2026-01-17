@@ -231,8 +231,12 @@ fetch('metadata.json')
         files++; dur += d;
       }
     });
+    const minutes = Math.floor(dur / 60);
+    const seconds = (dur % 60).toFixed(1);
+
     document.getElementById('stats').innerText =
-      `Файлов: ${files}, общая длительность: ${dur.toFixed(1)} сек`;
+      `Файлов: ${files}, общая длительность: ${minutes} мин ${seconds} сек`;
+
   }
 
   /* Фильтр */
